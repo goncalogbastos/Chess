@@ -20,6 +20,8 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     gs = ChessEngine.GameState()  # Game State
+    valid_moves = gs.get_valid_moves()
+    move_made = False  # flag variable for when a move is made
     load_images()
     running = True
     square_selected = ()  # no square selected initially
@@ -41,10 +43,19 @@ def main():
                 if len(player_clicks) == 2:  # after second click
                     move = ChessEngine.Move(player_clicks[0], player_clicks[1], gs.board)
                     print(move.get_chess_notation())
+                    if move in valid_moves:
+                        gs.make_move(move)
+                        move_made = True
                     gs.make_move(move)
                     square_selected = ()
                     player_clicks = []  # reset player clicks
-
+            elif e.type == p.KEYDOWN:  # Undo move
+                if e.key == p.K_z:
+                    gs.undo_move()
+                    move_made = True
+        if move_made:
+            valid_moves = gs.get_valid_moves()
+            move_made = False
         draw_game_state(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
