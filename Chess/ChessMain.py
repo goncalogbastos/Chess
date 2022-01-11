@@ -23,9 +23,10 @@ def main():
     valid_moves = gs.get_valid_moves()
     move_made = False  # flag variable for when a move is made
     load_images()
-    running = True
     square_selected = ()  # no square selected initially
     player_clicks = []  # track of player clicks
+
+    running = True
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
