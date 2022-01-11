@@ -46,8 +46,10 @@ def main():
                         gs.make_move(move)
                         print(move.get_chess_notation())
                         move_made = True
-                    square_selected = ()
-                    player_clicks = []  # reset player clicks
+                        square_selected = ()
+                        player_clicks = []  # reset player clicks
+                    else:
+                        player_clicks = [square_selected]
             elif e.type == p.KEYDOWN:  # Undo move
                 if e.key == p.K_z:
                     gs.undo_move()

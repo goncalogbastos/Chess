@@ -127,50 +127,22 @@ class GameState:
                     break  # off board
 
     def get_queen_moves(self, r, c, moves):
-        directions = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))
-        if self.white_to_move:
-            enemy_color = "b"
-        else:
-            enemy_color = "w"
-
-        for d in directions:
-            for i in range(1, 8):
-                end_row = r + d[0] * i
-                end_col = c + d[1] * i
-                if 0 <= end_row < 8 and 0 <= end_col < 8:
-                    end_piece = self.board[end_row][end_col]
-                    if end_piece == "--":  # Valid empty square
-                        moves.append(Move((r, c), (end_row, end_col), self.board))
-                    elif end_piece[0] == enemy_color:  # Enemy piece on square
-                        moves.append(Move((r, c), (end_row, end_col), self.board))
-                        break
-                    else:
-                        break  # Friendly piece
-                else:
-                    break  # off board
+        self.get_rook_moves(r, c, moves)
+        self.get_bishop_moves(r, c, moves)
 
     def get_king_moves(self, r, c, moves):
         directions = ((-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1))
         if self.white_to_move:
-            enemy_color = "b"
+            ally_color = "w"
         else:
-            enemy_color = "w"
-
-        for d in directions:
-            for i in range(1, 2):
-                end_row = r + d[0] * i
-                end_col = c + d[1] * i
-                if 0 <= end_row < 8 and 0 <= end_col < 8:
-                    end_piece = self.board[end_row][end_col]
-                    if end_piece == "--":  # Valid empty square
-                        moves.append(Move((r, c), (end_row, end_col), self.board))
-                    elif end_piece[0] == enemy_color:  # Enemy piece on square
-                        moves.append(Move((r, c), (end_row, end_col), self.board))
-                        break
-                    else:
-                        break  # Friendly piece
-                else:
-                    break  # off board
+            ally_color = "b"
+        for i in range(8):
+            end_row = r + directions[i][0]
+            end_col = c + directions[i][1]
+            if 0 <= end_row < 8 and 0 <= end_col < 8:
+                end_piece = self.board[end_row][end_col]
+                if end_piece[0] != ally_color:  # Not an ally piece (empty or enemy piece)
+                    moves.append(Move((r, c), (end_row, end_col), self.board))
 
 
 class Move:
