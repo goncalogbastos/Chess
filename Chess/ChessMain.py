@@ -42,11 +42,10 @@ def main():
                     player_clicks.append(square_selected)
                 if len(player_clicks) == 2:  # after second click
                     move = ChessEngine.Move(player_clicks[0], player_clicks[1], gs.board)
-                    print(move.get_chess_notation())
                     if move in valid_moves:
                         gs.make_move(move)
+                        print(move.get_chess_notation())
                         move_made = True
-                    gs.make_move(move)
                     square_selected = ()
                     player_clicks = []  # reset player clicks
             elif e.type == p.KEYDOWN:  # Undo move

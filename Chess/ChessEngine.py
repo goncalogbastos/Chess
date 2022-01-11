@@ -10,6 +10,8 @@ class GameState:
             ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
+        self.move_functions = {"p": self.get_pawn_moves, "R": self.get_rook_moves, "N": self.get_knight_moves,
+                               "B": self.get_bishop_moves, "Q": self.get_queen_moves, "K": self.get_king_moves}
         self.white_to_move = True
         self.moveLog = []
 
@@ -30,31 +32,61 @@ class GameState:
         return self.get_all_possible_moves()
 
     def get_all_possible_moves(self):
-        moves = [Move((6, 4), (4, 4), self.board)]
+        moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
-                if (turn == "w" and self.white_to_move) and (turn == "b" and not self.white_to_move):
+                if (turn == "w" and self.white_to_move) or (turn == "b" and not self.white_to_move):
                     piece = self.board[r][c][1]
-                    if piece == "p":
-                        self.get_pawn_moves(r, c, moves)
-                    elif piece == "R":
-                        self.get_rook_moves(r, c, moves)
-                    elif piece == "N":
-                        self.get_knight_moves(r, c, moves)
-                    elif piece == "B":
-                        self.get_bishop_moves(r, c, moves)
-                    elif piece == "Q":
-                        self.get_queen_moves(r, c, moves)
-                    elif piece == "K":
-                        self.get_king_moves(r, c, moves)
+                    self.move_functions[piece](r, c, moves)  # calls move function based on piece type
         return moves
 
     def get_pawn_moves(self, r, c, moves):
-        pass
+        if self.white_to_move:  # White pawn to move
+            if self.board[r - 1][c] == "--":  # 1 square move
+                moves.append(Move((r, c), (r - 1, c), self.board))
+                if r == 6 and self.board[r - 2][c] == "--":  # 2 squares move
+                    moves.append(Move((r, c), (r - 2, c), self.board))
+            if c - 1 >= 0:  # capture to the left
+                if self.board[r - 1][c - 1][0] == "b":  # Enemy piece to capture
+                    moves.append(Move((r, c), (r - 1, c - 1), self.board))
+            if c + 1 <= 7:  # capture to the right
+                if self.board[r - 1][c + 1][0] == "b":  # Enemy piece to capture
+                    moves.append(Move((r, c), (r - 1, c + 1), self.board))
+        else:  # Black pawn to move
+            if self.board[r + 1][c] == "--":  # 1 square move
+                moves.append(Move((r, c), (r + 1, c), self.board))
+                if r == 1 and self.board[r + 2][c] == "--":  # 2 squares move
+                    moves.append(Move((r, c), (r + 2, c), self.board))
+            if c - 1 >= 0:
+                if self.board[r + 1][c - 1][0] == "w":  # Enemy piece to capture
+                    moves.append(Move((r, c), (r + 1, c - 1), self.board))
+            if c + 1 <= 7:
+                if self.board[r + 1][c + 1][0] == "w":  # Enemy piece to capture
+                    moves.append(Move((r, c), (r + 1, c + 1), self.board))
 
     def get_rook_moves(self, r, c, moves):
-        pass
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
+        if self.white_to_move:
+            enemy_color = "b"
+        else:
+            enemy_color = "w"
+
+        for d in directions:
+            for i in range(1, 8):
+                end_row = r + d[0] * i
+                end_col = c + d[1] * i
+                if 0 <= end_row < 8 and 0 <= end_col < 8:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--":  # Valid empty square
+                        moves.append(Move((r, c), (end_row, end_col), self.board))
+                    elif end_piece[0] == enemy_color:  # Enemy piece on square
+                        moves.append(Move((r, c), (end_row, end_col), self.board))
+                        break
+                    else:
+                        break  # Friendly piece
+                else:
+                    break  # off board
 
     def get_knight_moves(self, r, c, moves):
         pass
@@ -70,26 +102,8 @@ class GameState:
 
 
 class Move:
-    rank_to_row = {
-        "1": 7,
-        "2": 6,
-        "3": 5,
-        "4": 4,
-        "5": 3,
-        "6": 2,
-        "7": 1,
-        "8": 0
-    }
-    file_to_col = {
-        "a": 0,
-        "b": 1,
-        "c": 2,
-        "d": 3,
-        "e": 4,
-        "f": 5,
-        "g": 6,
-        "h": 7
-    }
+    rank_to_row = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7": 1, "8": 0}
+    file_to_col = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
     row_to_rank = {v: k for k, v in rank_to_row.items()}
     col_to_file = {v: k for k, v in file_to_col.items()}
 
@@ -101,7 +115,6 @@ class Move:
         self.piece_moved = board[self.start_row][self.start_col]
         self.piece_captured = board[self.end_row][self.end_col]
         self.move_ID = self.start_row * 1000 + self.start_col * 100 + self.end_row * 10 + self.end_col
-        print(self.move_ID)
 
     def __eq__(self, other):
         if isinstance(other, Move):
